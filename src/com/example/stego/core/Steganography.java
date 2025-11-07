@@ -1,4 +1,4 @@
-package com.example.stego;
+package com.example.stego.core;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -12,8 +12,8 @@ import java.nio.charset.StandardCharsets;
 
 
 
-///  нУЖНО БУДЕТ ДОБАВИТЬ КЛЮЧ ШИФРОВАНИЯ
-/// И ЕЩЕ РЕАЛИЗОВАТЬ ЧЕРЕЗ СОКЕТЫ ЧТОБЫ ПЕРЕДАВАТЬ МОЖНО БЫЛО
+///
+/// РЕАЛИЗОВАТЬ ЧЕРЕЗ СОКЕТЫ ЧТОБЫ ПЕРЕДАВАТЬ МОЖНО БЫЛО
 ///
 ///
 

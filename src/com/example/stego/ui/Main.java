@@ -1,4 +1,4 @@
-package com.example.stego;
+package com.example.stego.ui;
 
 import javax.swing.*;
 

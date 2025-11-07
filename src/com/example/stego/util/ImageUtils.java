@@ -1,4 +1,4 @@
-package com.example.stego;
+package com.example.stego.util;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

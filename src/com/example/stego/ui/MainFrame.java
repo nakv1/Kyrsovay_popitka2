@@ -1,4 +1,8 @@
-package com.example.stego;
+package com.example.stego.ui;
+
+import com.example.stego.net.server.ImageSocketUtils;
+import com.example.stego.util.ImageUtils;
+import com.example.stego.core.Steganography;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -6,6 +10,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.Socket;
+import java.io.IOException;
+
 
 //Простой Swing-интерфейс GUI
 // вОТ тут нужно будет порабоатть чтобы не был старперский стиль из 00-ых
@@ -20,6 +27,13 @@ public class MainFrame extends JFrame {
     private JButton decodeButton;
     private JButton openButton;
     private JButton saveButton;
+    private JButton connectButton;
+    private JButton sendButton;
+
+    private Socket socket;
+    private String serverHost = "localhost";
+    private int serverPort = 12345;
+
 
     public MainFrame() {
         super("StegoApp - LSB (BMP/PNG)");
@@ -64,11 +78,21 @@ public class MainFrame extends JFrame {
         bottom.add(decodeButton);
         add(bottom, BorderLayout.SOUTH);
 
-        // Actions
+        //
         openButton.addActionListener(this::onOpen);
         saveButton.addActionListener(this::onSave);
         encodeButton.addActionListener(this::onEncode);
         decodeButton.addActionListener(this::onDecode);
+
+        connectButton = new JButton("Подключиться");
+        sendButton = new JButton("Отправить");
+        topPanel.add(connectButton);
+        topPanel.add(sendButton);
+
+        connectButton.addActionListener(this::onConnect);
+        sendButton.addActionListener(this::onSend);
+
+
     }
 
     private void onOpen(ActionEvent e) {
@@ -144,4 +168,69 @@ public class MainFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Непредвиденная ошибка: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
+    ///
+    ///
+    /// ДАЛЕЕ ВСЕ МЕТОДЫ ПРЕДНАЗНАЧЕНЫ ДЛЯ СЕРВЕРА
+    ///
+    ///
+    ///
+    private void onConnect(ActionEvent e) {
+        String def = serverHost + ":" + serverPort;
+        String s = JOptionPane.showInputDialog(this, "Введите IP:порт сервера", def);
+        if (s == null || s.trim().isEmpty()) return;
+
+        try {
+            String[] parts = s.trim().split(":");
+            serverHost = parts[0];
+            serverPort = (parts.length > 1) ? Integer.parseInt(parts[1]) : 12345;
+
+            socket = new Socket(serverHost, serverPort);
+            JOptionPane.showMessageDialog(this, "Подключено к " + serverHost + ":" + serverPort);
+
+            // запускаем фоновый приём картинок
+            new Thread(this::listenIncomingImages).start();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Ошибка подключения: " + ex.getMessage(),
+                    "Ошибка", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+    private void onSend(ActionEvent e) {
+        if (loadedImage == null) {
+            JOptionPane.showMessageDialog(this, "Сначала загрузите изображение!", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try {
+            // если соединения нет или оно закрыто — создаём заново с последними host:port
+            if (socket == null || socket.isClosed()) {
+                socket = new Socket(serverHost, serverPort);
+            }
+
+            ImageSocketUtils.sendImage(socket.getOutputStream(), loadedImage);
+            JOptionPane.showMessageDialog(this, "Изображение отправлено на сервер: " + serverHost + ":" + serverPort);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Ошибка при отправке: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+            try { if (socket != null) socket.close(); } catch (IOException ignored) {}
+            socket = null; // чтобы при следующем нажатии выполнилось переподключение
+        }
+    }
+    private void listenIncomingImages() {
+        if (socket == null) return;
+        try (java.io.DataInputStream dis =
+                     new java.io.DataInputStream(new java.io.BufferedInputStream(socket.getInputStream()))) {
+            while (true) {
+                BufferedImage img = ImageSocketUtils.receiveImage(dis); // читает [int][bytes]
+                if (img == null) continue;
+                File out = new File("downloaded_" + System.currentTimeMillis() + ".png");
+                javax.imageio.ImageIO.write(img, "png", out);
+                SwingUtilities.invokeLater(() ->
+                        JOptionPane.showMessageDialog(this, "Получено изображение.\nСохранено: " + out.getAbsolutePath())
+                );
+            }
+        } catch (IOException ex) {
+            // соединение закрыто
+        }
+    }
+
 }

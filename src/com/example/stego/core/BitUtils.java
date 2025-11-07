@@ -1,4 +1,4 @@
-package com.example.stego;
+package com.example.stego.core;
 
 //Небольшие утилиты для работы с битами. Егор разберись пожалуйста!!!!!!!
 public class BitUtils {
