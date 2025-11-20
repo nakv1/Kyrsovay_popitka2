@@ -72,7 +72,7 @@ public class MainFrame extends JFrame {
         initActions();
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(1200, 800));
+        setMinimumSize(new Dimension(1400, 800));
         setLocationRelativeTo(null);
     }
 
@@ -98,7 +98,7 @@ public class MainFrame extends JFrame {
 
         // предпросмотр файла
         lblContainerPreview = new JLabel("Нет изображения", SwingConstants.CENTER);
-        lblContainerPreview.setBorder(new TitledBorder("Контейнер (до)"));
+        lblContainerPreview.setBorder(new TitledBorder("Файл (до)"));
 
         // предпросмотр stego
         lblStegoPreview = new JLabel("Нет stego", SwingConstants.CENTER);
@@ -126,7 +126,6 @@ public class MainFrame extends JFrame {
 
         //     верх
         JPanel topPanel = new JPanel(new BorderLayout(8, 8));
-
         JPanel filePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         filePanel.add(btnOpen);
         filePanel.add(btnSave);
@@ -443,7 +442,6 @@ public class MainFrame extends JFrame {
 
 
     //  Вспомогательные методы
-
     // Обновляем предпросмотр контейнера (до)
     private void updatePreview() {
         if (containerImage == null) {
@@ -451,15 +449,26 @@ public class MainFrame extends JFrame {
             lblContainerPreview.setText("Нет изображения");
             return;
         }
+
+        int w = lblContainerPreview.getWidth();
+        int h = lblContainerPreview.getHeight();
+
+        if (w <= 0 || h <= 0) {
+            lblContainerPreview.setText(null);
+            lblContainerPreview.setIcon(new ImageIcon(containerImage));
+            return;
+        }
+
+        // Оставляем место под заголовок
+        int titlePadding = 25;
+        h = h - titlePadding;
+        if (h < 1) h = 1;
+
+        Image scaled = containerImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
         lblContainerPreview.setText(null);
-        lblContainerPreview.setIcon(new ImageIcon(
-                containerImage.getScaledInstance(
-                        lblContainerPreview.getWidth(),
-                        lblContainerPreview.getHeight(),
-                        Image.SCALE_SMOOTH
-                )
-        ));
+        lblContainerPreview.setIcon(new ImageIcon(scaled));
     }
+
 
     // Обновляем предпросмотр stego (после)
     private void updatePreviewStego() {
@@ -468,15 +477,25 @@ public class MainFrame extends JFrame {
             lblStegoPreview.setText("Нет stego");
             return;
         }
+
+        int w = lblStegoPreview.getWidth();
+        int h = lblStegoPreview.getHeight();
+
+        if (w <= 0 || h <= 0) {
+            lblStegoPreview.setText(null);
+            lblStegoPreview.setIcon(new ImageIcon(stegoImage));
+            return;
+        }
+
+        int titlePadding = 25;
+        h = h - titlePadding;
+        if (h < 1) h = 1;
+
+        Image scaled = stegoImage.getScaledInstance(w, h, Image.SCALE_SMOOTH);
         lblStegoPreview.setText(null);
-        lblStegoPreview.setIcon(new ImageIcon(
-                stegoImage.getScaledInstance(
-                        lblStegoPreview.getWidth(),
-                        lblStegoPreview.getHeight(),
-                        Image.SCALE_SMOOTH
-                )
-        ));
+        lblStegoPreview.setIcon(new ImageIcon(scaled));
     }
+
 
     private void updateCapacityLabel() {
         if (containerImage == null) {
