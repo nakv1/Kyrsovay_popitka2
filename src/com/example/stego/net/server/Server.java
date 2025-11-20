@@ -72,9 +72,14 @@ public class Server extends JFrame {
                     continue;
                 }
 
-                File out = new File("received_" + System.currentTimeMillis() + ".png");
+                File dir = new File("downloads/server");
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+                File out = new File(dir, "received_" + System.currentTimeMillis() + ".png");
                 ImageIO.write(img, "png", out);
                 log("Сохранено: " + out.getAbsolutePath());
+
 
                 // рассылаем всем остальным клиентам
                 broadcast(bytes, s);

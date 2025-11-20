@@ -1,6 +1,6 @@
 package com.example.stego.core;
 
-//Небольшие утилиты для работы с битами. Егор разберись пожалуйста!!!!!!!
+//Небольшие утилиты для работы с битами.
 public class BitUtils {
     //Возвращает i-тый бит в байте (0 — младший)
     public static int getBit(byte b, int i) {
