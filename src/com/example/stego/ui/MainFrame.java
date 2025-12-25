@@ -215,7 +215,11 @@ public class MainFrame extends JFrame {
         btnSend.addActionListener(this::onSend);
     }
 
-    //     Обработчики
+
+    private void setStegoImage(BufferedImage img) {
+        stegoImage = img;          // запоминаем картинку как stego
+        updatePreviewStego();      // обновляем lblStegoPreview
+    }
 
     // Открыть файл
     private void onOpen(ActionEvent e) {
@@ -235,7 +239,7 @@ public class MainFrame extends JFrame {
             updateCapacityLabel();  // пересчёт вместимости
 
             lblFileInfo.setText(String.format(
-                    "Снимок: %s (%d×%d)",
+                    "Файл: %s (%d×%d)",
                     f.getName(),
                     containerImage.getWidth(),
                     containerImage.getHeight()
@@ -419,6 +423,8 @@ public class MainFrame extends JFrame {
                 BufferedImage img = ImageSocketUtils.receiveImage(in);
                 if (img == null) continue;
 
+                SwingUtilities.invokeLater(() -> setStegoImage(img));
+
                 // сохраняем в downloads
                 File dir = new File("downloads/client");
                 if (!dir.exists())
@@ -426,8 +432,7 @@ public class MainFrame extends JFrame {
                 File out = new File(dir,"downloaded_" + System.currentTimeMillis() + ".png");
                 javax.imageio.ImageIO.write(img, "png", out);
 
-                log("Получено изображение от сервера. Сохранено: " + out.getAbsolutePath());
-                SwingUtilities.invokeLater(() -> {
+                log("Получено изображение от сервера. Сохранено: " + out.getAbsolutePath());                SwingUtilities.invokeLater(() -> {
                     JOptionPane.showMessageDialog(
                             this,
                             "Получено изображение.\nСохранено:\n" + out.getAbsolutePath(),
@@ -508,7 +513,7 @@ public class MainFrame extends JFrame {
         int totalBytes = bits / 8;
         int payload = totalBytes - 4;       // 4 байта на длину
         if (payload < 0) payload = 0;
-        lblCapacity.setText("Вместимость: примерно " + payload + " байт");
+        lblCapacity.setText("Вместимость: " + payload + " байт");
     }
 
     private void log(String text) {

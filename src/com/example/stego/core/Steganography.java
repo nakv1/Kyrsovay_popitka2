@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 
-// Основная логика LSB-стеганографии. Поддерживает BMP и PNG (работаем с BufferedImage). ТЫ ПОНЯЛ?????????
+// Основная логика LSB-стеганографии. Поддерживает BMP и PNG (работаем с BufferedImage).
 // Формат:
 // первые 32 бита: длина сообщения в байтах
 // далее messageBytes * 8 бит — само сообщение в UTF-8
